@@ -44,6 +44,6 @@ jobs:
           run: |
             ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh_key.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "
             docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest;
-            docker ps -q --filter ancestor=${{ secrets.DOCKER_USERNAME }}/portfolio:latest | xargs -r docker stop;
-            docker ps -a -q --filter ancestor=${{ secrets.DOCKER_USERNAME }}/portfolio:latest | xargs -r docker rm;
-            docker run -d -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/portfolio:latest"
+            docker stop portfolio-container || true;
+            docker rm portfolio-container || true;
+            docker run --name portfolio-container -d -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/portfolio:latest"
