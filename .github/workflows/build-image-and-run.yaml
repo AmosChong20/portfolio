@@ -40,6 +40,10 @@ jobs:
             chmod 400 ~/.ssh/ssh_key.pem
             ssh-keyscan -H ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
         
-        - name: Run Docker image on AWS EC2
+        - name: Run Docker container on AWS EC2
           run: |
-            ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh_key.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest && docker run -d -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/portfolio:latest"
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh_key.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "
+            docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest;
+            docker ps -q --filter ancestor=${{ secrets.DOCKER_USERNAME }}/portfolio:latest | xargs -r docker stop;
+            docker ps -a -q --filter ancestor=${{ secrets.DOCKER_USERNAME }}/portfolio:latest | xargs -r docker rm;
+            docker run -d -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/portfolio:latest"
