@@ -33,9 +33,13 @@ jobs:
             push: true
             tags: ${{ secrets.DOCKER_USERNAME }}/portfolio:latest
         
-        - name: Save SSH key
-          run: echo "${{ secrets.AWS_SSH_KEY }}" > ssh_key.pem
+        - name: Setup SSH Key
+          run: |
+            mkdir -p ~/.ssh
+            echo "${{ secrets.AWS_SSH_KEY }}" > ~/.ssh/ssh_key.pem
+            chmod 400 ~/.ssh/ssh_key.pem
+            ssh-keyscan -t rsa -H ${{ secrets.AWS_HOST }} >> ~/.ssh/known_hosts
         
         - name: Run Docker image on AWS EC2
           run: |
-            ssh -o StrictHostKeyChecking=no -i ssh_key.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest && docker run -d -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/portfolio:latest"
+            ssh -o StrictHostKeyChecking=no -i ~/.ssh/ssh_key.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} "docker pull ${{ secrets.DOCKER_USERNAME }}/portfolio:latest && docker run -d -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/portfolio:latest"
